@@ -1,0 +1,103 @@
+[package]
+name = "orban-agent-core"
+version = "0.1.0"
+edition = "2021"
+authors = ["Orban Platform Team"]
+description = "Core library for Orban GPU Agent - distributed GPU compute provider"
+license = "MIT"
+
+[dependencies]
+# Async runtime
+tokio = { version = "1.35", features = ["full"] }
+async-trait = "0.1"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# GPU Libraries
+# NVIDIA CUDA support
+nvml-wrapper = { version = "0.9", optional = true }
+cuda-runtime-sys = { version = "0.3", optional = true }
+
+# AMD ROCm support (Linux only)
+rocm-smi = { version = "0.1", optional = true }
+
+# Networking
+reqwest = { version = "0.11", features = ["json", "rustls-tls"] }
+tokio-tungstenite = { version = "0.21", features = ["rustls-tls-webpki-roots"] }
+futures-util = "0.3"
+
+# Error handling
+anyhow = "1.0"
+thiserror = "1.0"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Cryptography
+sha2 = "0.10"
+ed25519-dalek = "2.0"
+rand = "0.8"
+
+# Time
+chrono = { version = "0.4", features = ["serde"] }
+
+# Decimal precision for money calculations
+rust_decimal = { version = "1.33", features = ["serde-float"] }
+
+# System info
+sysinfo = "0.30"
+hostname = "0.3"
+
+# Configuration
+config = "0.13"
+directories = "5.0"
+
+# CLI
+clap = { version = "4.4", features = ["derive"] }
+
+# Container runtime (optional)
+bollard = { version = "0.15", optional = true }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+# Apple Metal support
+metal = { version = "0.27", optional = true }
+objc = "0.2"
+
+[target.'cfg(target_os = "windows")'.dependencies]
+# Windows-specific dependencies
+winapi = { version = "0.3", features = ["winuser", "wincon"] }
+
+[dev-dependencies]
+mockall = "0.12"
+tempfile = "3.8"
+
+[features]
+default = ["nvidia", "docker"]
+
+# GPU vendor support
+nvidia = ["nvml-wrapper", "cuda-runtime-sys"]
+amd = ["rocm-smi"]
+apple = ["metal"]
+
+# Runtime support
+docker = ["bollard"]
+
+# Enable GPU-specific tests (requires physical GPU)
+gpu-tests = []
+
+[lib]
+name = "orban_agent_core"
+path = "src/lib.rs"
+
+[[bin]]
+name = "orban-agent"
+path = "src/bin/agent.rs"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
