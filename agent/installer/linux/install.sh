@@ -3,10 +3,16 @@
 # Orban Agent 安裝腳本 (Linux)
 #
 # 使用方式：
-#   curl -fsSL https://get.orban.ai/agent | sh
+#   方式 1 (推薦): curl -fsSL https://get.orban.ai/agent | sh
+#   方式 2 (備用): curl -fsSL https://raw.githubusercontent.com/orbanplatform/orban-agent/main/agent/installer/linux/install.sh | sh
+#   方式 3 (離線): wget https://raw.githubusercontent.com/orbanplatform/orban-agent/main/agent/installer/linux/install.sh && bash install.sh
 #
 
 set -e
+
+# 設置重試次數
+MAX_RETRIES=3
+RETRY_DELAY=2
 
 # 顏色輸出
 RED='\033[0;31m'
@@ -131,10 +137,48 @@ else
     exit 1
 fi
 
-curl -fsSL "$DOWNLOAD_URL" -o "$TEMP_FILE"
+# 帶重試的下載函數
+download_with_retry() {
+    local url=$1
+    local output=$2
+    local attempt=1
+
+    while [ $attempt -le $MAX_RETRIES ]; do
+        info "Download attempt $attempt/$MAX_RETRIES..."
+
+        if curl -fsSL "$url" -o "$output" 2>/dev/null; then
+            return 0
+        fi
+
+        if [ $attempt -lt $MAX_RETRIES ]; then
+            warn "Download failed, retrying in ${RETRY_DELAY}s..."
+            sleep $RETRY_DELAY
+            RETRY_DELAY=$((RETRY_DELAY * 2))  # 指數退避
+        fi
+
+        attempt=$((attempt + 1))
+    done
+
+    return 1
+}
+
+# 嘗試下載
+if ! download_with_retry "$DOWNLOAD_URL" "$TEMP_FILE"; then
+    error "Failed to download Orban Agent after $MAX_RETRIES attempts"
+    echo ""
+    echo "Troubleshooting steps:"
+    echo "1. Check your internet connection"
+    echo "2. Verify GitHub is accessible: curl -I https://github.com"
+    echo "3. Try manual download:"
+    echo "   wget $DOWNLOAD_URL -O /tmp/orban-agent"
+    echo "   chmod +x /tmp/orban-agent"
+    echo "   sudo mv /tmp/orban-agent $INSTALL_DIR/orban-agent"
+    echo ""
+    exit 1
+fi
 
 if [ ! -f "$TEMP_FILE" ]; then
-    error "Failed to download Orban Agent"
+    error "Downloaded file not found"
     exit 1
 fi
 

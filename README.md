@@ -62,6 +62,46 @@ curl -fsSL https://get.orban.ai/agent | sh
 irm https://get.orban.ai/agent.ps1 | iex
 ```
 
+### Alternative Installation (If DNS Resolution Fails)
+
+If you encounter DNS resolution errors like `Could not resolve host: get.orban.ai`, use these alternative methods:
+
+**Method 1: Direct GitHub Download (Linux)**
+```bash
+curl -fsSL https://raw.githubusercontent.com/orbanplatform/orban-agent/main/agent/installer/linux/install.sh | sh
+```
+
+**Method 2: Manual Script Download (Linux)**
+```bash
+# Download the installation script
+wget https://raw.githubusercontent.com/orbanplatform/orban-agent/main/agent/installer/linux/install.sh
+
+# Make it executable
+chmod +x install.sh
+
+# Run the installer
+./install.sh
+```
+
+**Method 3: Direct Binary Download (Linux x86_64)**
+```bash
+# Download the latest release
+wget https://github.com/orbanplatform/orban-agent/releases/latest/download/orban-agent-linux-x86_64 -O /tmp/orban-agent
+
+# Make it executable
+chmod +x /tmp/orban-agent
+
+# Move to system path
+sudo mv /tmp/orban-agent /usr/local/bin/orban-agent
+
+# Verify installation
+orban-agent --version
+```
+
+**Method 4: Build from Source (All Platforms)**
+
+See the [Manual Installation](#manual-installation) section below for detailed build instructions.
+
 ### Manual Installation
 
 #### 1. Install Dependencies
@@ -220,6 +260,104 @@ Prevents fake nodes:
 - 📧 Email: support@orban.ai
 - 🐛 Bug Reports: https://github.com/orban-ai/orban-agent/issues
 - 📖 Docs: https://docs.orban.ai
+
+## 🔧 Troubleshooting
+
+### Installation Issues
+
+**Problem: `Could not resolve host: get.orban.ai`**
+
+This DNS resolution error occurs when the domain cannot be reached. Solutions:
+
+1. **Use Direct GitHub Installation:**
+   ```bash
+   curl -fsSL https://raw.githubusercontent.com/orbanplatform/orban-agent/main/agent/installer/linux/install.sh | sh
+   ```
+
+2. **Check DNS Settings:**
+   ```bash
+   # Test DNS resolution
+   nslookup get.orban.ai
+
+   # Try alternative DNS servers (Google DNS)
+   echo "nameserver 8.8.8.8" | sudo tee /etc/resolv.conf
+   ```
+
+3. **Use Alternative Installation Methods:**
+   - See the [Alternative Installation](#alternative-installation-if-dns-resolution-fails) section above
+
+**Problem: Download Fails from GitHub**
+
+If GitHub is blocked or slow:
+
+1. **Check GitHub Accessibility:**
+   ```bash
+   curl -I https://github.com
+   ```
+
+2. **Use Mirror or VPN:**
+   - Use a VPN if GitHub is blocked in your region
+   - Contact support@orban.ai for alternative download mirrors
+
+3. **Build from Source:**
+   - Clone the repository and build manually (see Manual Installation)
+
+**Problem: Permission Denied**
+
+If you see permission errors during installation:
+
+```bash
+# Give installer sudo access when prompted
+# Or manually move binary with sudo:
+sudo mv /tmp/orban-agent /usr/local/bin/orban-agent
+```
+
+### Runtime Issues
+
+**Problem: No GPU Detected**
+
+```bash
+# For NVIDIA GPUs, verify drivers:
+nvidia-smi
+
+# For AMD GPUs:
+rocm-smi
+
+# Install drivers if missing:
+sudo apt install nvidia-driver-535  # NVIDIA
+# or
+sudo apt install rocm  # AMD
+```
+
+**Problem: Agent Won't Start**
+
+```bash
+# Check agent status
+orban-agent status
+
+# View logs
+journalctl --user -u orban-agent -f
+
+# Restart agent
+systemctl --user restart orban-agent
+```
+
+**Problem: Connection to Platform Failed**
+
+```bash
+# Test platform connectivity
+curl -I https://platform.orban.ai
+
+# Check firewall settings (allow WebSocket connections)
+sudo ufw allow out 443/tcp
+```
+
+### Getting Help
+
+If issues persist:
+1. Check logs: `journalctl --user -u orban-agent -n 50`
+2. Report issue: https://github.com/orban-ai/orban-agent/issues
+3. Include: OS version, GPU model, error messages, and logs
 
 ## 📜 License
 
