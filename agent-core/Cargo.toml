@@ -1,0 +1,90 @@
+[package]
+name = "orban-agent-core"
+version = "1.0.0"
+edition = "2021"
+authors = ["Orban Team <dev@orban.ai>"]
+description = "Orban Agent - GPU供給端核心引擎"
+license = "MIT"
+
+[dependencies]
+# 非同步執行時
+tokio = { version = "1.35", features = ["full"] }
+tokio-tungstenite = { version = "0.21", features = ["native-tls"] }
+futures = "0.3"
+
+# 網路通訊
+reqwest = { version = "0.11", features = ["json", "stream"] }
+tungstenite = "0.21"
+native-tls = "0.2"
+
+# 序列化
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+prost = "0.12"  # Protocol Buffers
+prost-types = "0.12"
+
+# GPU 支援
+# NVIDIA CUDA
+nvml-wrapper = { version = "0.9", optional = true }
+cudarc = { version = "0.10", optional = true }
+
+# AMD ROCm
+# TODO: AMD ROCm bindings (需要 FFI 綁定)
+
+# 加密與安全
+ed25519-dalek = "2.1"
+sha2 = "0.10"
+rand = "0.8"
+jsonwebtoken = "9.2"
+uuid = { version = "1.6", features = ["v4", "serde"] }
+base64 = "0.21"
+hex = "0.4"
+
+# 資料結構
+dashmap = "5.5"  # 並發 HashMap
+crossbeam = "0.8"
+
+# 數值計算
+rust_decimal = "1.33"
+chrono = { version = "0.4", features = ["serde"] }
+
+# 日誌
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+
+# 錯誤處理
+thiserror = "1.0"
+anyhow = "1.0"
+
+# 系統資訊
+sysinfo = "0.30"
+
+# 檔案操作
+walkdir = "2.4"
+dirs = "5.0"
+
+# 配置管理
+config = "0.13"
+toml = "0.8"
+
+[build-dependencies]
+prost-build = "0.12"
+
+[dev-dependencies]
+criterion = "0.5"
+mockall = "0.12"
+
+[features]
+default = ["nvidia", "amd"]
+nvidia = ["nvml-wrapper", "cudarc"]
+amd = []
+apple = []
+
+[[bench]]
+name = "gpu_benchmark"
+harness = false
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
