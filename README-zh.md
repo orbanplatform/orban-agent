@@ -60,6 +60,46 @@ curl -fsSL https://get.orban.ai/agent | sh
 irm https://get.orban.ai/agent.ps1 | iex
 ```
 
+### 替代安裝方式 (如遇 DNS 解析錯誤)
+
+如果您遇到 DNS 解析錯誤，例如 `Could not resolve host: get.orban.ai`，請使用以下替代方式：
+
+**方式 1: 直接從 GitHub 下載 (Linux)**
+```bash
+curl -fsSL https://raw.githubusercontent.com/orbanplatform/orban-agent/main/agent/installer/linux/install.sh | sh
+```
+
+**方式 2: 手動下載安裝腳本 (Linux)**
+```bash
+# 下載安裝腳本
+wget https://raw.githubusercontent.com/orbanplatform/orban-agent/main/agent/installer/linux/install.sh
+
+# 賦予執行權限
+chmod +x install.sh
+
+# 運行安裝程式
+./install.sh
+```
+
+**方式 3: 直接下載二進制文件 (Linux x86_64)**
+```bash
+# 下載最新版本
+wget https://github.com/orbanplatform/orban-agent/releases/latest/download/orban-agent-linux-x86_64 -O /tmp/orban-agent
+
+# 賦予執行權限
+chmod +x /tmp/orban-agent
+
+# 移動到系統路徑
+sudo mv /tmp/orban-agent /usr/local/bin/orban-agent
+
+# 驗證安裝
+orban-agent --version
+```
+
+**方式 4: 從源碼編譯 (所有平台)**
+
+參見下方的[手動安裝](#手動安裝)章節以獲取詳細的編譯說明。
+
 ### 手動安裝
 
 #### 1. 安裝依賴
@@ -300,33 +340,105 @@ cargo fmt
 
 ## 🐛 故障排除
 
-### GPU 未被偵測
+### 安裝問題
+
+**問題：`Could not resolve host: get.orban.ai`**
+
+此 DNS 解析錯誤表示無法訪問該域名。解決方案：
+
+1. **使用 GitHub 直接安裝：**
+   ```bash
+   curl -fsSL https://raw.githubusercontent.com/orbanplatform/orban-agent/main/agent/installer/linux/install.sh | sh
+   ```
+
+2. **檢查 DNS 設定：**
+   ```bash
+   # 測試 DNS 解析
+   nslookup get.orban.ai
+
+   # 嘗試使用備用 DNS 伺服器 (Google DNS)
+   echo "nameserver 8.8.8.8" | sudo tee /etc/resolv.conf
+   ```
+
+3. **使用替代安裝方式：**
+   - 參見上方的[替代安裝方式](#替代安裝方式-如遇-dns-解析錯誤)章節
+
+**問題：無法從 GitHub 下載**
+
+如果 GitHub 被封鎖或速度緩慢：
+
+1. **檢查 GitHub 可訪問性：**
+   ```bash
+   curl -I https://github.com
+   ```
+
+2. **使用鏡像站或 VPN：**
+   - 如果您所在地區封鎖了 GitHub，請使用 VPN
+   - 聯繫 support@orban.ai 獲取替代下載鏡像
+
+3. **從源碼編譯：**
+   - 克隆倉庫並手動編譯（參見手動安裝章節）
+
+**問題：權限被拒絕**
+
+如果在安裝過程中遇到權限錯誤：
+
+```bash
+# 在提示時提供 sudo 權限
+# 或手動使用 sudo 移動二進制文件：
+sudo mv /tmp/orban-agent /usr/local/bin/orban-agent
+```
+
+### 運行時問題
+
+**問題：GPU 未被偵測**
 
 ```bash
 # 檢查 NVIDIA 驅動
 nvidia-smi
 
+# 檢查 AMD GPU
+rocm-smi
+
 # 檢查 NVML 庫
 ldconfig -p | grep nvidia
 
 # 重新安裝驅動
-sudo apt install --reinstall nvidia-driver-535
+sudo apt install --reinstall nvidia-driver-535  # NVIDIA
+# 或
+sudo apt install rocm  # AMD
 ```
 
-### 連線失敗
+**問題：Agent 無法啟動**
 
 ```bash
-# 檢查網路
-ping platform.orban.ai
+# 檢查 Agent 狀態
+orban-agent status
+
+# 查看日誌
+journalctl --user -u orban-agent -f
+
+# 重新啟動 Agent
+systemctl --user restart orban-agent
+```
+
+**問題：連線平台失敗**
+
+```bash
+# 測試平台連線
+curl -I https://platform.orban.ai
+
+# 檢查防火牆設定 (允許 WebSocket 連線)
+sudo ufw allow out 443/tcp
 
 # 檢查 WebSocket 連線
 websocat wss://platform.orban.ai/agent/v1/connect
 
-# 查看日誌
+# 查看詳細日誌
 orban-agent logs --level debug
 ```
 
-### 任務執行失敗
+**問題：任務執行失敗**
 
 ```bash
 # 檢查 Docker
@@ -335,6 +447,13 @@ docker run --rm --gpus all nvidia/cuda:11.8.0-base-ubuntu22.04 nvidia-smi
 # 查看沙盒日誌
 orban-agent logs --task <task-id>
 ```
+
+### 獲取幫助
+
+如果問題仍然存在：
+1. 檢查日誌：`journalctl --user -u orban-agent -n 50`
+2. 提交問題：https://github.com/orban-ai/orban-agent/issues
+3. 請包含：操作系統版本、GPU 型號、錯誤訊息和日誌
 
 ## 🤝 社群與支援
 
