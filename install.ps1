@@ -83,12 +83,36 @@ function Build-FromSource {
 
     # 檢查 Git
     if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
-        Write-Error-Custom "Git is not installed"
+        Write-Warn "Git is not installed. Installing Git automatically..."
         Write-Host ""
-        Write-Host "Please install Git first:"
-        Write-Host "  Download from: https://git-scm.com/download/win"
-        Write-Host "  Or use winget: winget install Git.Git"
-        exit 1
+
+        # 嘗試使用 winget 安裝 Git
+        if (Get-Command winget -ErrorAction SilentlyContinue) {
+            try {
+                Write-Info "Installing Git via winget..."
+                winget install --id Git.Git --silent --accept-package-agreements --accept-source-agreements
+
+                # 刷新環境變量
+                $env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [Environment]::GetEnvironmentVariable("Path", "User")
+
+                Write-Success "Git installed successfully"
+            }
+            catch {
+                Write-Error-Custom "Failed to install Git via winget"
+                Write-Host ""
+                Write-Host "Please install Git manually:"
+                Write-Host "  Download from: https://git-scm.com/download/win"
+                exit 1
+            }
+        }
+        else {
+            Write-Error-Custom "Git is required but winget is not available"
+            Write-Host ""
+            Write-Host "Please install Git manually:"
+            Write-Host "  Download from: https://git-scm.com/download/win"
+            Write-Host "  Or install winget from Microsoft Store"
+            exit 1
+        }
     }
 
     # 檢查 Rust
