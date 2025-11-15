@@ -350,18 +350,6 @@ impl Message {
     pub fn from_json(json: &str) -> Result<Self> {
         Ok(serde_json::from_str(json)?)
     }
-
-    /// 序列化為 Protocol Buffers (TODO)
-    pub fn to_protobuf(&self) -> Result<Vec<u8>> {
-        // TODO: 實現 protobuf 序列化
-        unimplemented!("Protobuf serialization not yet implemented")
-    }
-
-    /// 從 Protocol Buffers 反序列化 (TODO)
-    pub fn from_protobuf(_data: &[u8]) -> Result<Self> {
-        // TODO: 實現 protobuf 反序列化
-        unimplemented!("Protobuf deserialization not yet implemented")
-    }
 }
 
 // ==================== 便捷構建函數 ====================

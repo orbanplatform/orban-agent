@@ -71,9 +71,6 @@ pub enum Error {
     #[error("Serialization error: {0}")]
     SerializationError(#[from] serde_json::Error),
 
-    #[error("Protobuf decode error: {0}")]
-    ProtobufDecodeError(#[from] prost::DecodeError),
-
     // Agent 狀態錯誤
     #[error("Agent not registered")]
     NotRegistered,

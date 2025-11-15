@@ -24,8 +24,6 @@ native-tls = "0.2"
 # 序列化
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-prost = "0.12"  # Protocol Buffers
-prost-types = "0.12"
 
 # GPU 支援
 # NVIDIA CUDA
@@ -82,9 +80,6 @@ daemonize = "0.5"
 syslog = "6.1"
 nix = { version = "0.27", features = ["signal", "process"] }
 libc = "0.2"
-
-[build-dependencies]
-prost-build = "0.12"
 
 [dev-dependencies]
 criterion = "0.5"
