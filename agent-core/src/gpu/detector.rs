@@ -82,13 +82,13 @@ impl GPUDetector {
     fn detect_nvidia() -> Result<Vec<GPUDeviceRef>> {
         use super::nvidia::NvidiaGPU;
 
-        let nvml = nvml_wrapper::Nvml::init()?;
+        let nvml = Arc::new(nvml_wrapper::Nvml::init()?);
         let device_count = nvml.device_count()?;
 
         let mut devices = Vec::new();
         for i in 0..device_count {
-            let device = nvml.device_by_index(i)?;
-            devices.push(Arc::new(NvidiaGPU::new(device)) as GPUDeviceRef);
+            let gpu = NvidiaGPU::new(nvml.clone(), i)?;
+            devices.push(Arc::new(gpu) as GPUDeviceRef);
         }
 
         Ok(devices)

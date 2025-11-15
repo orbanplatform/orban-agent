@@ -17,19 +17,18 @@ unsafe impl Send for NvidiaGPU {}
 unsafe impl Sync for NvidiaGPU {}
 
 impl NvidiaGPU {
-    pub fn new(device: Device<'static>) -> Self {
-        let index = device.index().unwrap_or(0);
+    pub fn new(nvml: Arc<Nvml>, index: u32) -> Result<Self> {
+        let device = nvml.device_by_index(index)?;
 
-        // 保持 NVML 實例的所有權
-        // 注意：這裡我們假設 NVML 已經初始化
-        // 實際使用時需要更好的生命週期管理
-        let nvml = Arc::new(Nvml::init().expect("Failed to initialize NVML"));
+        // SAFETY: 我們通過 Arc 持有 nvml 的所有權，
+        // 所以可以安全地將 device 的生命週期延長到 'static
+        let device: Device<'static> = unsafe { std::mem::transmute(device) };
 
-        Self {
+        Ok(Self {
             device,
             index,
             nvml,
-        }
+        })
     }
 
     /// 獲取 CUDA 核心數量（基於架構推算）
@@ -102,8 +101,8 @@ impl GPUDevice for NvidiaGPU {
     }
 
     fn compute_capability(&self) -> Result<String> {
-        let (major, minor) = self.device.cuda_compute_capability()?;
-        Ok(format!("{}.{}", major, minor))
+        let capability = self.device.cuda_compute_capability()?;
+        Ok(format!("{}.{}", capability.major, capability.minor))
     }
 
     fn cuda_cores(&self) -> Option<u32> {
@@ -112,8 +111,6 @@ impl GPUDevice for NvidiaGPU {
 
     fn pcie_bandwidth(&self) -> Result<u32> {
         // 獲取 PCIe 世代和寬度
-        use nvml_wrapper::enum_wrappers::device::PcieLinkMaxSpeed;
-
         let max_link_gen = self.device.max_pcie_link_gen()?;
         let max_link_width = self.device.max_pcie_link_width()?;
 
