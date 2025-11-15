@@ -13,7 +13,7 @@ curl -fsSL https://raw.githubusercontent.com/orbanplatform/orban-agent/main/inst
 ### Windows (PowerShell)
 
 ```powershell
-irm https://raw.githubusercontent.com/orbanplatform/orban-agent/main/install.ps1 | iex
+iwr -useb https://raw.githubusercontent.com/orbanplatform/orban-agent/main/install.ps1 | iex
 ```
 
 ## 立即開始

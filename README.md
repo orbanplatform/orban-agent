@@ -56,9 +56,16 @@ Orban Agent is a high-performance, secure GPU supply-side agent that allows user
 curl -fsSL https://raw.githubusercontent.com/orbanplatform/orban-agent/main/install.sh | bash
 ```
 
+**Windows (PowerShell)**
+```powershell
+iwr -useb https://raw.githubusercontent.com/orbanplatform/orban-agent/main/install.ps1 | iex
+```
+
 **Alternative Methods**
 
 **Method 1: Direct Binary Download**
+
+*Linux / macOS:*
 ```bash
 # Download the latest release for your platform
 # Linux x86_64
@@ -72,6 +79,19 @@ chmod +x orban-agent-*
 sudo mv orban-agent-* /usr/local/bin/orban-agent
 
 # Verify
+orban-agent version
+```
+
+*Windows (PowerShell):*
+```powershell
+# Download the latest release
+Invoke-WebRequest -Uri "https://github.com/orbanplatform/orban-agent/releases/latest/download/orban-agent-windows-x86_64.exe" -OutFile "$env:USERPROFILE\.orban\bin\orban-agent.exe"
+
+# Add to PATH
+$userPath = [Environment]::GetEnvironmentVariable("Path", "User")
+[Environment]::SetEnvironmentVariable("Path", "$userPath;$env:USERPROFILE\.orban\bin", "User")
+
+# Verify (restart terminal first)
 orban-agent version
 ```
 

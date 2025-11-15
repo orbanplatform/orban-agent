@@ -54,9 +54,16 @@ Orban Agent 是一個高效能、安全的 GPU 供給端代理程序。它允許
 curl -fsSL https://raw.githubusercontent.com/orbanplatform/orban-agent/main/install.sh | bash
 ```
 
+**Windows (PowerShell)**
+```powershell
+iwr -useb https://raw.githubusercontent.com/orbanplatform/orban-agent/main/install.ps1 | iex
+```
+
 **替代安裝方式**
 
 **方式 1: 直接下載二進制文件**
+
+*Linux / macOS:*
 ```bash
 # 根據您的平台下載最新版本
 # Linux x86_64
@@ -70,6 +77,19 @@ chmod +x orban-agent-*
 sudo mv orban-agent-* /usr/local/bin/orban-agent
 
 # 驗證安裝
+orban-agent version
+```
+
+*Windows (PowerShell):*
+```powershell
+# 下載最新版本
+Invoke-WebRequest -Uri "https://github.com/orbanplatform/orban-agent/releases/latest/download/orban-agent-windows-x86_64.exe" -OutFile "$env:USERPROFILE\.orban\bin\orban-agent.exe"
+
+# 添加到 PATH
+$userPath = [Environment]::GetEnvironmentVariable("Path", "User")
+[Environment]::SetEnvironmentVariable("Path", "$userPath;$env:USERPROFILE\.orban\bin", "User")
+
+# 驗證安裝（需先重啟終端）
 orban-agent version
 ```
 
