@@ -86,7 +86,9 @@ download_binary() {
         if ! curl -fsSL "${RELEASE_URL}" -o "${TEMP_FILE}"; then
             error "Failed to download from: ${RELEASE_URL}"
             echo ""
-            warn "Release may not exist yet. Building from source instead..."
+            warn "GitHub Release 可能還在構建中，或者版本不存在"
+            warn "將從源碼編譯安裝（首次安裝可能需要 5-10 分鐘）..."
+            echo ""
             build_from_source
             return
         fi
@@ -94,7 +96,9 @@ download_binary() {
         if ! wget -q "${RELEASE_URL}" -O "${TEMP_FILE}"; then
             error "Failed to download from: ${RELEASE_URL}"
             echo ""
-            warn "Release may not exist yet. Building from source instead..."
+            warn "GitHub Release 可能還在構建中，或者版本不存在"
+            warn "將從源碼編譯安裝（首次安裝可能需要 5-10 分鐘）..."
+            echo ""
             build_from_source
             return
         fi
@@ -113,20 +117,47 @@ download_binary() {
 build_from_source() {
     info "Building Orban Agent from source..."
 
+    # 檢查 Git
+    if ! command -v git &> /dev/null; then
+        error "Git is not installed"
+        echo ""
+        echo "Please install Git first:"
+        case "$OS_TYPE" in
+            linux)
+                echo "  Ubuntu/Debian: sudo apt install git"
+                echo "  CentOS/RHEL:   sudo yum install git"
+                ;;
+            macos)
+                echo "  Run: xcode-select --install"
+                echo "  Or install via Homebrew: brew install git"
+                ;;
+        esac
+        exit 1
+    fi
+
     # 檢查 Rust
     if ! command -v cargo &> /dev/null; then
-        error "Rust is not installed"
+        warn "Rust is not installed. Installing Rust automatically..."
         echo ""
-        echo "Install Rust from: https://rustup.rs/"
-        echo "Run: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh"
-        exit 1
+
+        # 自動安裝 Rust (非互動模式)
+        if ! curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y; then
+            error "Failed to install Rust"
+            echo ""
+            echo "Please install Rust manually from: https://rustup.rs/"
+            exit 1
+        fi
+
+        # 載入 Rust 環境
+        source "$HOME/.cargo/env"
+        success "Rust installed successfully"
     fi
 
     # 克隆倉庫
     TEMP_DIR="/tmp/orban-agent-build-$$"
     info "Cloning repository to ${TEMP_DIR}..."
 
-    if ! git clone https://github.com/orbanplatform/orban-agent.git "${TEMP_DIR}"; then
+    if ! git clone --depth 1 https://github.com/orbanplatform/orban-agent.git "${TEMP_DIR}"; then
         error "Failed to clone repository"
         exit 1
     fi
@@ -134,13 +165,24 @@ build_from_source() {
     cd "${TEMP_DIR}/agent-core"
 
     # 構建
-    info "Building release binary (this may take a few minutes)..."
+    info "Building release binary (this may take 5-10 minutes on first build)..."
     if ! cargo build --release; then
         error "Build failed"
+        cd - > /dev/null
+        rm -rf "${TEMP_DIR}"
         exit 1
     fi
 
-    BINARY_SOURCE="${TEMP_DIR}/agent-core/target/release/orban-agent"
+    # 複製二進制文件到臨時位置
+    BUILT_BINARY="${TEMP_DIR}/agent-core/target/release/orban-agent"
+    FINAL_TEMP="/tmp/orban-agent-final-$$"
+    cp "${BUILT_BINARY}" "${FINAL_TEMP}"
+
+    # 清理構建目錄（節省空間）
+    cd - > /dev/null
+    rm -rf "${TEMP_DIR}"
+
+    BINARY_SOURCE="${FINAL_TEMP}"
     success "Built Orban Agent from source"
 }
 
