@@ -70,13 +70,93 @@ function Download-Binary {
     catch {
         Write-Error-Custom "Failed to download from: $releaseUrl"
         Write-Host ""
-        Write-Warn "Release may not exist yet. Please build from source manually."
+        Write-Warn "GitHub Release 可能還在構建中，或者版本不存在"
+        Write-Warn "將從源碼編譯安裝（首次安裝可能需要 5-10 分鐘）..."
         Write-Host ""
-        Write-Host "To build from source:"
-        Write-Host "  1. Install Rust from: https://rustup.rs/"
-        Write-Host "  2. Clone: git clone https://github.com/orbanplatform/orban-agent.git"
-        Write-Host "  3. Build: cd orban-agent\agent-core && cargo build --release"
-        Write-Host "  4. Binary will be at: target\release\orban-agent.exe"
+        Build-FromSource
+    }
+}
+
+# 從源碼構建
+function Build-FromSource {
+    Write-Info "Building Orban Agent from source..."
+
+    # 檢查 Git
+    if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+        Write-Error-Custom "Git is not installed"
+        Write-Host ""
+        Write-Host "Please install Git first:"
+        Write-Host "  Download from: https://git-scm.com/download/win"
+        Write-Host "  Or use winget: winget install Git.Git"
+        exit 1
+    }
+
+    # 檢查 Rust
+    if (-not (Get-Command cargo -ErrorAction SilentlyContinue)) {
+        Write-Warn "Rust is not installed. Installing Rust automatically..."
+        Write-Host ""
+
+        # 下載並安裝 Rust
+        try {
+            $rustupUrl = "https://win.rustup.rs/x86_64"
+            $rustupInstaller = "$env:TEMP\rustup-init.exe"
+
+            Write-Info "Downloading Rust installer..."
+            Invoke-WebRequest -Uri $rustupUrl -OutFile $rustupInstaller -UseBasicParsing
+
+            Write-Info "Installing Rust (this may take a few minutes)..."
+            Start-Process -FilePath $rustupInstaller -ArgumentList "-y" -Wait -NoNewWindow
+
+            # 更新環境變量
+            $env:Path = "$env:USERPROFILE\.cargo\bin;$env:Path"
+
+            Write-Success "Rust installed successfully"
+        }
+        catch {
+            Write-Error-Custom "Failed to install Rust"
+            Write-Host ""
+            Write-Host "Please install Rust manually from: https://rustup.rs/"
+            exit 1
+        }
+    }
+
+    # 克隆倉庫
+    $tempDir = "$env:TEMP\orban-agent-build-$PID"
+    Write-Info "Cloning repository to $tempDir..."
+
+    try {
+        git clone --depth 1 https://github.com/orbanplatform/orban-agent.git $tempDir
+    }
+    catch {
+        Write-Error-Custom "Failed to clone repository"
+        exit 1
+    }
+
+    # 構建
+    Push-Location "$tempDir\agent-core"
+
+    Write-Info "Building release binary (this may take 5-10 minutes on first build)..."
+
+    try {
+        cargo build --release
+
+        # 複製二進制文件
+        $builtBinary = "$tempDir\agent-core\target\release\orban-agent.exe"
+        $finalTemp = "$env:TEMP\orban-agent-final-$PID.exe"
+        Copy-Item -Path $builtBinary -Destination $finalTemp
+
+        Pop-Location
+
+        # 清理構建目錄
+        Remove-Item -Path $tempDir -Recurse -Force
+
+        $script:binarySource = $finalTemp
+        Write-Success "Built Orban Agent from source"
+    }
+    catch {
+        Pop-Location
+        Remove-Item -Path $tempDir -Recurse -Force -ErrorAction SilentlyContinue
+        Write-Error-Custom "Build failed"
         exit 1
     }
 }
