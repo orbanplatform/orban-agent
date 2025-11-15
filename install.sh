@@ -197,9 +197,14 @@ install_binary() {
         INSTALL_DIR="/usr/local/bin"
     fi
 
-    # 創建目錄（如果需要）
-    if [ ! -d "$INSTALL_DIR" ] && [ "$INSTALL_DIR" = "$HOME/.orban/bin" ]; then
-        mkdir -p "$INSTALL_DIR"
+    # 創建目錄（如果不存在）
+    if [ ! -d "$INSTALL_DIR" ]; then
+        info "Creating directory: $INSTALL_DIR"
+        if [ -w "$(dirname "$INSTALL_DIR")" ]; then
+            mkdir -p "$INSTALL_DIR"
+        else
+            sudo mkdir -p "$INSTALL_DIR"
+        fi
     fi
 
     # 複製文件
