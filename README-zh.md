@@ -15,7 +15,6 @@ Orban Agent 是一個高效能、安全的 GPU 供給端代理程序。它允許
 - ✅ **安全隔離**: Docker/進程沙盒隔離執行任務
 - ✅ **自動化**: 開機自啟、斷線重連、故障恢復
 - ✅ **收益追蹤**: 即時收益監控、歷史記錄、自動結算
-- ✅ **低延遲**: WebSocket 長連線、高效二進制協議
 - ✅ **隱私保護**: 端到端加密、本地數據不上傳
 
 ## 🏗️ 架構
@@ -52,53 +51,33 @@ Orban Agent 是一個高效能、安全的 GPU 供給端代理程序。它允許
 
 **Linux / macOS**
 ```bash
-curl -fsSL https://get.orban.ai/agent | sh
+curl -fsSL https://raw.githubusercontent.com/orbanplatform/orban-agent/main/install.sh | bash
 ```
 
-**Windows (PowerShell)**
-```powershell
-irm https://get.orban.ai/agent.ps1 | iex
-```
+**替代安裝方式**
 
-### 替代安裝方式 (如遇 DNS 解析錯誤)
-
-如果您遇到 DNS 解析錯誤，例如 `Could not resolve host: get.orban.ai`，請使用以下替代方式：
-
-**方式 1: 直接從 GitHub 下載 (Linux)**
+**方式 1: 直接下載二進制文件**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/orbanplatform/orban-agent/main/agent/installer/linux/install.sh | sh
-```
+# 根據您的平台下載最新版本
+# Linux x86_64
+wget https://github.com/orbanplatform/orban-agent/releases/latest/download/orban-agent-linux-x86_64
 
-**方式 2: 手動下載安裝腳本 (Linux)**
-```bash
-# 下載安裝腳本
-wget https://raw.githubusercontent.com/orbanplatform/orban-agent/main/agent/installer/linux/install.sh
+# macOS Apple Silicon (M1/M2/M3)
+wget https://github.com/orbanplatform/orban-agent/releases/latest/download/orban-agent-macos-aarch64
 
-# 賦予執行權限
-chmod +x install.sh
-
-# 運行安裝程式
-./install.sh
-```
-
-**方式 3: 直接下載二進制文件 (Linux x86_64)**
-```bash
-# 下載最新版本
-wget https://github.com/orbanplatform/orban-agent/releases/latest/download/orban-agent-linux-x86_64 -O /tmp/orban-agent
-
-# 賦予執行權限
-chmod +x /tmp/orban-agent
-
-# 移動到系統路徑
-sudo mv /tmp/orban-agent /usr/local/bin/orban-agent
+# 賦予執行權限並安裝
+chmod +x orban-agent-*
+sudo mv orban-agent-* /usr/local/bin/orban-agent
 
 # 驗證安裝
-orban-agent --version
+orban-agent version
 ```
 
-**方式 4: 從源碼編譯 (所有平台)**
+**方式 2: 從源碼編譯**
 
 參見下方的[手動安裝](#手動安裝)章節以獲取詳細的編譯說明。
+
+安裝完成後，請參閱 [QUICKSTART.md](./QUICKSTART.md) 獲取使用指南。
 
 ### 手動安裝
 

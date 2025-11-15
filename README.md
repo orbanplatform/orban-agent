@@ -17,7 +17,6 @@ Orban Agent is a high-performance, secure GPU supply-side agent that allows user
 - ✅ **Secure Isolation**: Docker/process sandbox for task execution
 - ✅ **Automation**: Auto-start, reconnection, fault recovery
 - ✅ **Earnings Tracking**: Real-time earnings monitoring, history, auto settlement
-- ✅ **Low Latency**: WebSocket persistent connection, efficient binary protocol
 - ✅ **Privacy Protection**: End-to-end encryption, local data stays local
 
 ## 🏗️ Architecture
@@ -54,53 +53,33 @@ Orban Agent is a high-performance, secure GPU supply-side agent that allows user
 
 **Linux / macOS**
 ```bash
-curl -fsSL https://get.orban.ai/agent | sh
+curl -fsSL https://raw.githubusercontent.com/orbanplatform/orban-agent/main/install.sh | bash
 ```
 
-**Windows (PowerShell)**
-```powershell
-irm https://get.orban.ai/agent.ps1 | iex
-```
+**Alternative Methods**
 
-### Alternative Installation (If DNS Resolution Fails)
-
-If you encounter DNS resolution errors like `Could not resolve host: get.orban.ai`, use these alternative methods:
-
-**Method 1: Direct GitHub Download (Linux)**
+**Method 1: Direct Binary Download**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/orbanplatform/orban-agent/main/agent/installer/linux/install.sh | sh
+# Download the latest release for your platform
+# Linux x86_64
+wget https://github.com/orbanplatform/orban-agent/releases/latest/download/orban-agent-linux-x86_64
+
+# macOS Apple Silicon
+wget https://github.com/orbanplatform/orban-agent/releases/latest/download/orban-agent-macos-aarch64
+
+# Make it executable and install
+chmod +x orban-agent-*
+sudo mv orban-agent-* /usr/local/bin/orban-agent
+
+# Verify
+orban-agent version
 ```
 
-**Method 2: Manual Script Download (Linux)**
-```bash
-# Download the installation script
-wget https://raw.githubusercontent.com/orbanplatform/orban-agent/main/agent/installer/linux/install.sh
-
-# Make it executable
-chmod +x install.sh
-
-# Run the installer
-./install.sh
-```
-
-**Method 3: Direct Binary Download (Linux x86_64)**
-```bash
-# Download the latest release
-wget https://github.com/orbanplatform/orban-agent/releases/latest/download/orban-agent-linux-x86_64 -O /tmp/orban-agent
-
-# Make it executable
-chmod +x /tmp/orban-agent
-
-# Move to system path
-sudo mv /tmp/orban-agent /usr/local/bin/orban-agent
-
-# Verify installation
-orban-agent --version
-```
-
-**Method 4: Build from Source (All Platforms)**
+**Method 2: Build from Source**
 
 See the [Manual Installation](#manual-installation) section below for detailed build instructions.
+
+After installation, see [QUICKSTART.md](./QUICKSTART.md) for usage guide.
 
 ### Manual Installation
 

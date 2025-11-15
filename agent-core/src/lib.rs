@@ -12,6 +12,9 @@ pub mod compute;
 pub mod earnings;
 pub mod types;
 pub mod error;
+pub mod config;
+pub mod daemon;
+pub mod cli;
 
 // 重新導出常用類型
 pub use error::{Error, Result};
@@ -43,7 +46,8 @@ impl OrbanAgent {
         let network_client = network::OrbanClient::new(&config).await?;
 
         // 創建任務執行器
-        let task_executor = compute::TaskExecutor::new(gpu_detector.clone())?;
+        let devices: Vec<_> = gpu_detector.get_all_devices().to_vec();
+        let task_executor = compute::TaskExecutor::new(devices)?;
 
         // 創建收益追蹤器
         let earnings_tracker = earnings::EarningsTracker::new()?;
@@ -120,20 +124,26 @@ impl OrbanAgent {
 
     /// 處理來自平台的訊息
     async fn handle_message(&mut self, msg: network::Message) -> Result<()> {
-        use network::MessageType;
+        use network::{MessageType, MessagePayload};
 
         match msg.message_type {
             MessageType::TaskAssign => {
-                info!("Received task assignment: {}", msg.task_id);
-                self.handle_task_assign(msg).await?;
+                info!("Received task assignment");
+                if let MessagePayload::TaskAssign(payload) = msg.payload {
+                    self.handle_task_assign(payload).await?;
+                }
             }
             MessageType::PowChallenge => {
                 info!("Received PoW challenge");
-                self.handle_pow_challenge(msg).await?;
+                if let MessagePayload::PowChallenge(payload) = msg.payload {
+                    self.handle_pow_challenge(payload).await?;
+                }
             }
             MessageType::EarningsRecord => {
                 info!("Received earnings record");
-                self.handle_earnings_record(msg).await?;
+                if let MessagePayload::EarningsRecord(payload) = msg.payload {
+                    self.handle_earnings_record(payload).await?;
+                }
             }
             _ => {
                 warn!("Unknown message type: {:?}", msg.message_type);
@@ -144,35 +154,41 @@ impl OrbanAgent {
     }
 
     /// 處理任務分配
-    async fn handle_task_assign(&mut self, msg: network::Message) -> Result<()> {
+    async fn handle_task_assign(&mut self, payload: network::TaskAssignPayload) -> Result<()> {
         // 檢查是否有足夠的資源
-        if !self.can_accept_task(&msg.task_requirements) {
-            self.network_client.reject_task(&msg.task_id, "insufficient_resources").await?;
+        if !self.can_accept_task(&payload.requirements) {
+            // TODO: Implement reject_task
+            // self.network_client.reject_task(&payload.task_id, "insufficient_resources").await?;
             return Ok(());
         }
 
         // 接受任務
-        self.network_client.accept_task(&msg.task_id).await?;
+        // TODO: Implement accept_task
+        // self.network_client.accept_task(&payload.task_id).await?;
 
         // 執行任務
-        let result = self.task_executor.execute(msg.task_payload).await?;
+        // TODO: Convert payload to Task
+        // let result = self.task_executor.execute(task).await?;
 
         // 上報完成
-        self.network_client.complete_task(&msg.task_id, result).await?;
+        // TODO: Implement complete_task
+        // self.network_client.complete_task(&payload.task_id, result).await?;
 
         Ok(())
     }
 
     /// 處理工作證明挑戰
-    async fn handle_pow_challenge(&mut self, msg: network::Message) -> Result<()> {
-        let response = self.gpu_detector.compute_pow(msg.pow_challenge)?;
-        self.network_client.send_pow_response(response).await?;
+    async fn handle_pow_challenge(&mut self, payload: network::PowChallengePayload) -> Result<()> {
+        let challenge = payload.nonce.as_bytes();
+        let _response = self.gpu_detector.compute_pow(challenge)?;
+        // TODO: Implement send_pow_response
+        // self.network_client.send_pow_response(response).await?;
         Ok(())
     }
 
     /// 處理收益記錄
-    async fn handle_earnings_record(&mut self, msg: network::Message) -> Result<()> {
-        self.earnings_tracker.record_earnings(msg.earnings).await?;
+    async fn handle_earnings_record(&mut self, payload: network::EarningsRecordPayload) -> Result<()> {
+        self.earnings_tracker.record_earnings(payload.earnings).await?;
         Ok(())
     }
 

@@ -1,7 +1,7 @@
 // 收益追蹤器
 
 use crate::types::{EarningRecord, EarningsData, EarningStatus};
-use crate::network::orban_protocol::EarningsDetail;
+use crate::network::EarningsDetail;
 use crate::error::Result;
 use chrono::Utc;
 use rust_decimal::Decimal;

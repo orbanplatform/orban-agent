@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orban Agent - GPU 算力貢獻平台</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 頂部標題 -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                        <circle cx="20" cy="20" r="18" fill="url(#orbanGradient)"/>
+                        <path d="M15 20L18 23L25 16" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                        <defs>
+                            <linearGradient id="orbanGradient" x1="0" y1="0" x2="40" y2="40">
+                                <stop offset="0%" stop-color="#6FBD58"/>
+                                <stop offset="100%" stop-color="#FEC804"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <div>
+                    <h1>Orban Agent</h1>
+                    <p>分散式 GPU 算力貢獻平台</p>
+                </div>
+            </div>
+            <div class="status-badge" id="agentStatus">
+                <span class="status-dot"></span>
+                <span class="status-text">運行中</span>
+            </div>
+        </header>
+
+        <!-- 收益概覽卡片 -->
+        <section class="earnings-overview">
+            <div class="card earnings-card">
+                <div class="card-icon">💰</div>
+                <div class="card-content">
+                    <h3>總收益</h3>
+                    <p class="amount" id="totalEarnings">$0.00</p>
+                    <span class="subtitle">USD</span>
+                </div>
+            </div>
+
+            <div class="card earnings-card">
+                <div class="card-icon">📅</div>
+                <div class="card-content">
+                    <h3>今日收益</h3>
+                    <p class="amount" id="todayEarnings">$0.00</p>
+                    <span class="subtitle">USD</span>
+                </div>
+            </div>
+
+            <div class="card earnings-card">
+                <div class="card-icon">⏳</div>
+                <div class="card-content">
+                    <h3>待確認</h3>
+                    <p class="amount" id="pendingEarnings">$0.00</p>
+                    <span class="subtitle">USD</span>
+                </div>
+            </div>
+
+            <div class="card earnings-card">
+                <div class="card-icon">✅</div>
+                <div class="card-content">
+                    <h3>完成任務</h3>
+                    <p class="amount" id="tasksCompleted">0</p>
+                    <span class="subtitle">個</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- GPU 狀態監控 -->
+        <section class="gpu-section">
+            <h2>📊 GPU 狀態監控</h2>
+            <div id="gpuList" class="gpu-list">
+                <!-- GPU 卡片將由 JS 動態生成 -->
+            </div>
+        </section>
+
+        <!-- 收益歷史記錄 -->
+        <section class="history-section">
+            <h2>📜 收益歷史</h2>
+            <div class="table-container">
+                <table class="earnings-table">
+                    <thead>
+                        <tr>
+                            <th>時間</th>
+                            <th>GPU 型號</th>
+                            <th>執行時間</th>
+                            <th>費率</th>
+                            <th>收益</th>
+                            <th>狀態</th>
+                        </tr>
+                    </thead>
+                    <tbody id="earningsHistory">
+                        <!-- 歷史記錄將由 JS 動態生成 -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Agent 資訊 -->
+        <section class="info-section">
+            <div class="card info-card">
+                <h3>Agent 資訊</h3>
+                <div class="info-item">
+                    <span class="info-label">Agent ID:</span>
+                    <span class="info-value" id="agentId">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">版本:</span>
+                    <span class="info-value">v0.1.0</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">運行時長:</span>
+                    <span class="info-value" id="uptime">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">平台連接:</span>
+                    <span class="info-value status-connected">已連接</span>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

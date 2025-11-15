@@ -4,14 +4,14 @@ use thiserror::Error;
 #[derive(Error, Debug)]
 pub enum Error {
     // GPU 相關錯誤
-    #[error("GPU not found")]
+    #[error("No GPU found")]
     GPUNotFound,
-
-    #[error("Insufficient VRAM: required {required}GB, available {available}GB")]
-    InsufficientVRAM { required: u32, available: u32 },
 
     #[error("GPU error: {0}")]
     GPUError(String),
+
+    #[error("Insufficient VRAM: required {required}GB, available {available}GB")]
+    InsufficientVRAM { required: u32, available: u32 },
 
     #[cfg(feature = "nvidia")]
     #[error("NVML error: {0}")]
@@ -73,6 +73,10 @@ pub enum Error {
 
     #[error("Protobuf decode error: {0}")]
     ProtobufDecodeError(#[from] prost::DecodeError),
+
+    // Agent 狀態錯誤
+    #[error("Agent not registered")]
+    NotRegistered,
 
     // 其他錯誤
     #[error("Unknown error: {0}")]

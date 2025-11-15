@@ -1,4 +1,4 @@
-use crate::types::{GPUInfo, GPUStatus, GPUVendor, MemoryInfo};
+use crate::types::{GPUInfo, GPUStatus, GPUVendor, MemoryInfo, TaskRequirements};
 use crate::error::Result;
 use std::sync::Arc;
 

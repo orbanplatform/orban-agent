@@ -6,6 +6,10 @@ authors = ["Orban Team <dev@orban.ai>"]
 description = "Orban Agent - GPU供給端核心引擎"
 license = "MIT"
 
+[[bin]]
+name = "orban-agent"
+path = "src/main.rs"
+
 [dependencies]
 # 非同步執行時
 tokio = { version = "1.35", features = ["full"] }
@@ -66,6 +70,18 @@ dirs = "5.0"
 # 配置管理
 config = "0.13"
 toml = "0.8"
+directories = "5.0"
+
+# 系统工具
+hostname = "0.3"
+
+# CLI 工具
+clap = { version = "4.4", features = ["derive", "cargo"] }
+colored = "2.1"
+daemonize = "0.5"
+syslog = "6.1"
+nix = { version = "0.27", features = ["signal", "process"] }
+libc = "0.2"
 
 [build-dependencies]
 prost-build = "0.12"
@@ -75,14 +91,14 @@ criterion = "0.5"
 mockall = "0.12"
 
 [features]
-default = ["nvidia", "amd"]
+default = []
 nvidia = ["nvml-wrapper", "cudarc"]
 amd = []
 apple = []
 
-[[bench]]
-name = "gpu_benchmark"
-harness = false
+# [[bench]]
+# name = "gpu_benchmark"
+# harness = false
 
 [profile.release]
 opt-level = 3
