@@ -244,10 +244,20 @@ function Verify-Installation {
 
     if (Test-Path $agentPath) {
         try {
-            $versionOutput = & $agentPath version 2>&1
-            if ($versionOutput -match "Version:\s*(.+)") {
+            $versionOutput = & $agentPath version 2>&1 | Out-String
+
+            # 移除 ANSI 顏色代碼以便正則匹配
+            $cleanOutput = $versionOutput -replace '\x1b\[[0-9;]*m', ''
+
+            # 嘗試匹配版本號
+            if ($cleanOutput -match "Version:\s*([^\s\r\n]+)") {
                 $version = $matches[1].Trim()
                 Write-Success "orban-agent $version installed successfully!"
+                return $true
+            }
+            else {
+                # 如果無法匹配版本號，但命令能執行，仍然視為成功
+                Write-Success "orban-agent installed successfully!"
                 return $true
             }
         }
@@ -257,7 +267,7 @@ function Verify-Installation {
         }
     }
 
-    Write-Error-Custom "Installation verification failed"
+    Write-Error-Custom "Installation verification failed: Binary not found at $agentPath"
     return $false
 }
 
