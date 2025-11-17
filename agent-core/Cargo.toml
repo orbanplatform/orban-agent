@@ -75,10 +75,13 @@ hostname = "0.3"
 # CLI 工具
 clap = { version = "4.4", features = ["derive", "cargo"] }
 colored = "2.1"
+libc = "0.2"
+
+# Unix/Linux 專用依賴（Windows 上不編譯）
+[target.'cfg(unix)'.dependencies]
 daemonize = "0.5"
 syslog = "6.1"
 nix = { version = "0.27", features = ["signal", "process"] }
-libc = "0.2"
 
 [dev-dependencies]
 criterion = "0.5"
