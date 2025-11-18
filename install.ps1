@@ -9,30 +9,41 @@
 
 $ErrorActionPreference = "Stop"
 
+# 設置控制台輸出編碼為 UTF-8
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$OutputEncoding = [System.Text.Encoding]::UTF8
+
+# 嘗試設置控制台代碼頁為 UTF-8（忽略錯誤）
+try {
+    chcp 65001 | Out-Null
+} catch {
+    # 忽略錯誤，繼續執行
+}
+
 # 顏色函數
 function Write-Info($message) {
-    Write-Host "ℹ $message" -ForegroundColor Blue
+    Write-Host "[i] $message" -ForegroundColor Blue
 }
 
 function Write-Success($message) {
-    Write-Host "✓ $message" -ForegroundColor Green
+    Write-Host "[OK] $message" -ForegroundColor Green
 }
 
 function Write-Error-Custom($message) {
-    Write-Host "✗ $message" -ForegroundColor Red
+    Write-Host "[X] $message" -ForegroundColor Red
 }
 
 function Write-Warn($message) {
-    Write-Host "⚠ $message" -ForegroundColor Yellow
+    Write-Host "[!] $message" -ForegroundColor Yellow
 }
 
 # 打印橫幅
 function Print-Banner {
     Write-Host ""
-    Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Cyan
-    Write-Host "  🚀 Orban Agent Installer v1.0.0" -ForegroundColor Cyan
-    Write-Host "  Contribute your GPU, earn rewards" -ForegroundColor Cyan
-    Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Cyan
+    Write-Host "============================================================" -ForegroundColor Cyan
+    Write-Host "     Orban Agent Installer v1.0.0" -ForegroundColor Cyan
+    Write-Host "     Contribute your GPU, earn rewards" -ForegroundColor Cyan
+    Write-Host "============================================================" -ForegroundColor Cyan
     Write-Host ""
 }
 
@@ -274,9 +285,9 @@ function Verify-Installation {
 # 顯示後續步驟
 function Show-NextSteps {
     Write-Host ""
-    Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Cyan
-    Write-Host "✓ Installation completed successfully!" -ForegroundColor Green
-    Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Cyan
+    Write-Host "============================================================" -ForegroundColor Cyan
+    Write-Host "     Installation completed successfully!" -ForegroundColor Green
+    Write-Host "============================================================" -ForegroundColor Cyan
     Write-Host ""
     Write-Host "Next steps:"
     Write-Host ""
