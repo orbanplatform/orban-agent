@@ -81,8 +81,8 @@ function Download-Binary {
     catch {
         Write-Error-Custom "Failed to download from: $releaseUrl"
         Write-Host ""
-        Write-Warn "GitHub Release 可能還在構建中，或者版本不存在"
-        Write-Warn "將從源碼編譯安裝（首次安裝可能需要 5-10 分鐘）..."
+        Write-Warn "GitHub Release may still be building or does not exist"
+        Write-Warn "Building from source instead (first install may take 5-10 minutes)..."
         Write-Host ""
         Build-FromSource
     }
