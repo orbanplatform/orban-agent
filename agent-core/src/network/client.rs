@@ -248,7 +248,7 @@ impl OrbanClient {
 
         let msg = Message {
             message_id: uuid::Uuid::new_v4().to_string(),
-            timestamp: chrono::Utc::now().timestamp() as u64,
+            timestamp: chrono::Utc::now(),
             message_type: MessageType::PowResponse,
             payload: MessagePayload::PowResponse(payload),
         };

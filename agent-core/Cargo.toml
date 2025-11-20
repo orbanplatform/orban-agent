@@ -71,6 +71,7 @@ directories = "5.0"
 
 # 系统工具
 hostname = "0.3"
+num_cpus = "1.16"
 
 # CLI 工具
 clap = { version = "4.4", features = ["derive", "cargo"] }

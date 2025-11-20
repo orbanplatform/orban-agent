@@ -86,11 +86,11 @@ impl GpuPowComputer {
     fn get_gpu_signature() -> Result<GpuSignature> {
         #[cfg(feature = "nvidia")]
         {
-            let nvml = Nvml::init().map_err(|e| Error::GpuError(format!("NVML init failed: {}", e)))?;
-            let device = nvml.device_by_index(0).map_err(|e| Error::GpuError(format!("Get device failed: {}", e)))?;
+            let nvml = Nvml::init().map_err(|e| Error::GPUError(format!("NVML init failed: {}", e)))?;
+            let device = nvml.device_by_index(0).map_err(|e| Error::GPUError(format!("Get device failed: {}", e)))?;
 
-            let uuid = device.uuid().map_err(|e| Error::GpuError(format!("Get UUID failed: {}", e)))?;
-            let name = device.name().map_err(|e| Error::GpuError(format!("Get name failed: {}", e)))?;
+            let uuid = device.uuid().map_err(|e| Error::GPUError(format!("Get UUID failed: {}", e)))?;
+            let name = device.name().map_err(|e| Error::GPUError(format!("Get name failed: {}", e)))?;
             let cuda_version = nvml.sys_cuda_driver_version().ok().map(|v| format!("{}.{}", v / 1000, (v % 1000) / 10));
             let compute_capability = device.cuda_compute_capability().ok().map(|(major, minor)| format!("{}.{}", major, minor));
 
@@ -127,7 +127,7 @@ impl GpuPowComputer {
 
         // 检查是否超时
         if chrono::Utc::now() > challenge.deadline {
-            return Err(Error::Other("Challenge deadline exceeded".to_string()));
+            return Err(Error::Other(anyhow::anyhow!("Challenge deadline exceeded")));
         }
 
         // 根据GPU类型选择计算策略
@@ -209,7 +209,7 @@ impl GpuPowComputer {
                 })
             }
             Err(_) => {
-                Err(Error::Other(format!("PoW computation timeout after {}s", self.config.max_compute_time_sec)))
+                Err(Error::Other(anyhow::anyhow!("PoW computation timeout after {}s", self.config.max_compute_time_sec)))
             }
         }
     }

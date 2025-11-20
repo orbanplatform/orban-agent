@@ -186,7 +186,7 @@ impl OrbanAgent {
         // 構建挑戰
         let challenge = PowChallenge {
             challenge_id: payload.challenge_id.clone(),
-            nonce: payload.nonce,
+            nonce: hex::decode(&payload.nonce).map_err(|e| Error::Other(anyhow::anyhow!("Invalid nonce hex: {}", e)))?,
             difficulty: payload.difficulty,
             deadline: payload.deadline,
         };
