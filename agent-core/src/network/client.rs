@@ -8,8 +8,9 @@ use crate::error::{Error, Result};
 use crate::AgentConfig;
 
 use tokio::net::TcpStream;
-use tokio_tungstenite::{connect_async, MaybeTlsStream, WebSocketStream};
+use tokio_tungstenite::{connect_async, MaybeTlsStream, WebSocketStream, tungstenite};
 use tokio_tungstenite::tungstenite::protocol::Message as WsMessage;
+use tokio_tungstenite::tungstenite::http;
 use futures::{StreamExt, SinkExt};
 use tracing::{info, warn, error};
 use std::sync::Arc;
