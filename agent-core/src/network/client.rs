@@ -48,7 +48,17 @@ impl OrbanClient {
 
         let url = format!("{}/agent/v1/connect", self.config.platform_url);
 
-        let (ws_stream, _) = connect_async(&url)
+        // 創建 WebSocket 請求，添加子協議頭
+        let request = url.parse::<http::Uri>()
+            .map_err(|e| Error::ConnectionFailed(format!("Invalid URL: {}", e)))?;
+
+        let (ws_stream, _) = connect_async(
+            tungstenite::handshake::client::Request::builder()
+                .uri(request)
+                .header("Sec-WebSocket-Protocol", "agent.orban.v1")
+                .body(())
+                .map_err(|e| Error::ConnectionFailed(format!("Failed to build request: {}", e)))?
+        )
             .await
             .map_err(|e| Error::ConnectionFailed(e.to_string()))?;
 
