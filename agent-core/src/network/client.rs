@@ -230,6 +230,32 @@ impl OrbanClient {
         Ok(())
     }
 
+    /// 發送 PoW 響應
+    pub async fn send_pow_response(&self, response: crate::gpu::PowResponse) -> Result<()> {
+        use super::orban_protocol::{Message, MessageType, MessagePayload, PowResponsePayload, GpuSignature};
+
+        info!("Sending PoW response for challenge: {}", response.challenge_id);
+
+        let payload = PowResponsePayload {
+            challenge_id: response.challenge_id,
+            response: hex::encode(response.response),  // Convert Vec<u8> to hex string
+            computation_time_ms: response.computation_time_ms as u32,
+            gpu_signature: GpuSignature {
+                device_uuid: response.gpu_signature.device_uuid,
+                cuda_version: response.gpu_signature.cuda_version,
+            },
+        };
+
+        let msg = Message {
+            message_id: uuid::Uuid::new_v4().to_string(),
+            timestamp: chrono::Utc::now().timestamp() as u64,
+            message_type: MessageType::PowResponse,
+            payload: MessagePayload::PowResponse(payload),
+        };
+
+        self.send_message(&msg).await
+    }
+
     /// 斷線
     pub async fn disconnect(&self) -> Result<()> {
         if let Some(mut ws) = self.ws.lock().await.take() {
