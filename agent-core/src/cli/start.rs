@@ -156,8 +156,8 @@ async fn run_agent(config: Config) -> Result<()> {
         platform_url: config.platform_url.clone(),
         private_key_path: config.private_key_path.clone(),
         availability: crate::types::Availability {
-            always_on: config.availability.always_on,
-            schedule: None,
+            hours_per_day: if config.availability.always_on { 24 } else { 12 },
+            reliability_score: 0.95,
         },
     };
 
