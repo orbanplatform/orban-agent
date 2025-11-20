@@ -11,6 +11,7 @@ use tokio::net::TcpStream;
 use tokio_tungstenite::{connect_async, MaybeTlsStream, WebSocketStream, tungstenite};
 use tokio_tungstenite::tungstenite::protocol::Message as WsMessage;
 use tokio_tungstenite::tungstenite::http;
+use tungstenite::client::IntoClientRequest;
 use futures::{StreamExt, SinkExt};
 use tracing::{info, warn, error};
 use std::sync::Arc;
@@ -49,17 +50,17 @@ impl OrbanClient {
 
         let url = format!("{}/agent/v1/connect", self.config.platform_url);
 
-        // 創建 WebSocket 請求，添加子協議頭
-        let request = url.parse::<http::Uri>()
+        // 使用 IntoClientRequest trait 添加子協議
+        let mut request = url.into_client_request()
             .map_err(|e| Error::ConnectionFailed(format!("Invalid URL: {}", e)))?;
 
-        let (ws_stream, _) = connect_async(
-            tungstenite::handshake::client::Request::builder()
-                .uri(request)
-                .header("Sec-WebSocket-Protocol", "agent.orban.v1")
-                .body(())
-                .map_err(|e| Error::ConnectionFailed(format!("Failed to build request: {}", e)))?
-        )
+        // 添加子協議頭
+        request.headers_mut().insert(
+            "Sec-WebSocket-Protocol",
+            "agent.orban.v1".parse().unwrap()
+        );
+
+        let (ws_stream, _) = connect_async(request)
             .await
             .map_err(|e| Error::ConnectionFailed(e.to_string()))?;
 
