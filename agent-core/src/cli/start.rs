@@ -146,14 +146,23 @@ async fn daemonize_windows(daemon: &DaemonManager, config: Config) -> Result<()>
 async fn run_agent(config: Config) -> Result<()> {
     info!("Orban Agent starting...");
 
-    // TODO: 這裡需要實際的 OrbanAgent 實現
-    // 目前使用模擬運行
-
     println!("  {} GPU detection...", "✓".green());
-    // let gpu_detector = crate::gpu::GPUDetector::detect_all()?;
 
     println!("  {} Connecting to platform...", "✓".green());
-    // let network_client = crate::network::OrbanClient::new(&config).await?;
+
+    // 創建 AgentConfig 從 Config
+    let agent_config = crate::AgentConfig {
+        agent_id: config.agent_id.clone(),
+        platform_url: config.platform_url.clone(),
+        private_key_path: config.private_key_path.clone(),
+        availability: crate::types::Availability {
+            always_on: config.availability.always_on,
+            schedule: None,
+        },
+    };
+
+    // 創建並啟動 Agent
+    let mut agent = crate::OrbanAgent::new(agent_config).await?;
 
     println!();
     println!("{} Agent started successfully!", "✓".green());
@@ -162,9 +171,8 @@ async fn run_agent(config: Config) -> Result<()> {
     println!("  View logs:   {}", "orban-agent logs".cyan());
     println!("  Stop agent:  {}", "orban-agent stop".cyan());
 
-    // 模擬運行（實際應該調用 OrbanAgent::start()）
-    // 為了演示，這裡簡單等待信號
-    tokio::signal::ctrl_c().await?;
+    // 啟動 Agent（會進入事件循環）
+    agent.start().await?;
 
     info!("Agent shutting down...");
     Ok(())

@@ -7,20 +7,65 @@ use crate::Result;
 /// Agent 配置
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Config {
+    /// Agent ID
+    #[serde(default = "default_agent_id")]
+    pub agent_id: String,
+
     /// 平台 URL
     pub platform_url: String,
 
+    /// 私鑰路徑
+    #[serde(default = "default_private_key_path")]
+    pub private_key_path: String,
+
     /// Agent 數據目錄
+    #[serde(default = "Config::default_data_dir")]
     pub data_dir: PathBuf,
 
     /// 日誌級別
+    #[serde(default = "default_log_level")]
     pub log_level: String,
 
     /// GPU 配置
+    #[serde(default)]
     pub gpu: GpuConfig,
 
     /// 網路配置
+    #[serde(default)]
     pub network: NetworkConfig,
+
+    /// 可用性配置
+    #[serde(default)]
+    pub availability: AvailabilityConfig,
+}
+
+fn default_agent_id() -> String {
+    format!("agent-{}", hostname::get().unwrap().to_string_lossy())
+}
+
+fn default_private_key_path() -> String {
+    let data_dir = Config::default_data_dir();
+    data_dir.join("agent.key").to_string_lossy().to_string()
+}
+
+fn default_log_level() -> String {
+    "info".to_string()
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AvailabilityConfig {
+    #[serde(default = "default_true")]
+    pub always_on: bool,
+}
+
+fn default_true() -> bool {
+    true
+}
+
+impl Default for AvailabilityConfig {
+    fn default() -> Self {
+        Self { always_on: true }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -50,11 +95,14 @@ pub struct NetworkConfig {
 impl Default for Config {
     fn default() -> Self {
         Self {
+            agent_id: default_agent_id(),
             platform_url: "https://platform.orban.ai".to_string(),
+            private_key_path: default_private_key_path(),
             data_dir: Self::default_data_dir(),
             log_level: "info".to_string(),
             gpu: GpuConfig::default(),
             network: NetworkConfig::default(),
+            availability: AvailabilityConfig::default(),
         }
     }
 }
