@@ -131,7 +131,6 @@ pub enum MessagePayload {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AuthChallengePayload {
     pub challenge: String,
-    pub timestamp: u64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -199,7 +198,6 @@ pub struct TaskProgressPayload {
     pub progress: f32,
     pub stage: String,
     pub metrics: TaskMetrics,
-    pub timestamp: DateTime<Utc>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -240,7 +238,6 @@ pub struct HeartbeatPayload {
     pub current_task_id: Option<String>,
     pub gpu_status: Vec<GPUStatus>,
     pub uptime_sec: u64,
-    pub timestamp: DateTime<Utc>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -447,7 +444,6 @@ pub fn create_heartbeat(
             current_task_id,
             gpu_status,
             uptime_sec,
-            timestamp: Utc::now(),
         }),
     )
 }
