@@ -92,7 +92,7 @@ impl GpuPowComputer {
             let uuid = device.uuid().map_err(|e| Error::GPUError(format!("Get UUID failed: {}", e)))?;
             let name = device.name().map_err(|e| Error::GPUError(format!("Get name failed: {}", e)))?;
             let cuda_version = nvml.sys_cuda_driver_version().ok().map(|v| format!("{}.{}", v / 1000, (v % 1000) / 10));
-            let compute_capability = device.cuda_compute_capability().ok().map(|(major, minor)| format!("{}.{}", major, minor));
+            let compute_capability = device.cuda_compute_capability().ok().map(|cc| format!("{}.{}", cc.major, cc.minor));
 
             Ok(GpuSignature {
                 device_uuid: uuid,
