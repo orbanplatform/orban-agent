@@ -162,7 +162,13 @@ impl OrbanClient {
 
     /// 接收訊息
     pub async fn receive(&self) -> Option<Message> {
-        self.receive_message().await.ok()
+        match self.receive_message().await {
+            Ok(msg) => Some(msg),
+            Err(e) => {
+                error!("Failed to receive message: {}", e);
+                None
+            }
+        }
     }
 
     /// 接收訊息 (內部)
@@ -171,6 +177,7 @@ impl OrbanClient {
             while let Some(msg) = ws.next().await {
                 match msg {
                     Ok(WsMessage::Text(text)) => {
+                        tracing::debug!("Received message: {}", text);
                         return Message::from_json(&text);
                     }
                     Ok(WsMessage::Binary(data)) => {
