@@ -174,7 +174,7 @@ Base Rate × GPU Multiplier × Runtime = Earnings
 | RTX 3080  | 1.5×       | $0.015     |
 | V100      | 3.5×       | $0.035     |
 
-### Bonus Programs (Coming Soon)
+### Bonus Programs
 
 - **New Node Bonus** - Extra rewards for newly joined nodes
 - **Reliability Bonus** - Multiplier for high-uptime nodes
