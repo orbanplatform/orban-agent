@@ -179,10 +179,29 @@ impl OrbanAgent {
 
     /// 處理工作證明挑戰
     async fn handle_pow_challenge(&mut self, payload: network::PowChallengePayload) -> Result<()> {
-        let challenge = payload.nonce.as_bytes();
-        let _response = self.gpu_detector.compute_pow(challenge)?;
-        // TODO: Implement send_pow_response
-        // self.network_client.send_pow_response(response).await?;
+        use gpu::PowChallenge;
+
+        info!("Computing PoW challenge: {}", payload.challenge_id);
+
+        // 構建挑戰
+        let challenge = PowChallenge {
+            challenge_id: payload.challenge_id.clone(),
+            nonce: hex::decode(&payload.nonce).map_err(|e| Error::Other(anyhow::anyhow!("Invalid nonce hex: {}", e)))?,
+            difficulty: payload.difficulty,
+            deadline: payload.deadline,
+        };
+
+        // 計算響應
+        let response = self.gpu_detector.compute_pow(&challenge)?;
+
+        info!(
+            "PoW computed in {}ms, solution_nonce: {}",
+            response.computation_time_ms, response.solution_nonce
+        );
+
+        // 發送響應
+        self.network_client.send_pow_response(response).await?;
+
         Ok(())
     }
 

@@ -208,13 +208,17 @@ impl GPUDetector {
         suitable_devices.first().copied()
     }
 
-    /// 計算工作證明 (使用第一個 GPU)
-    pub fn compute_pow(&self, challenge: &[u8]) -> Result<Vec<u8>> {
-        if let Some(device) = self.devices.first() {
-            device.compute_pow(challenge, 4)
-        } else {
-            Err(Error::GPUNotFound)
-        }
+    /// 計算工作證明 (使用GPU加速)
+    pub fn compute_pow(&self, challenge: &super::PowChallenge) -> Result<super::PowResponse> {
+        use super::pow::{GpuPowComputer, PowConfig};
+
+        let config = PowConfig {
+            difficulty: challenge.difficulty,
+            max_compute_time_sec: 10,
+        };
+
+        let computer = GpuPowComputer::new(config)?;
+        computer.compute(challenge)
     }
 }
 

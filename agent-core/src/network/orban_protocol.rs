@@ -51,6 +51,8 @@ pub enum MessageType {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Message {
     pub message_id: String,
+
+    #[serde(with = "timestamp_deserialize")]
     pub timestamp: DateTime<Utc>,
 
     #[serde(rename = "type")]
@@ -58,6 +60,45 @@ pub struct Message {
 
     #[serde(flatten)]
     pub payload: MessagePayload,
+}
+
+// 自定義反序列化：支持 Unix timestamp (整數) 和 RFC 3339 (字符串)
+mod timestamp_deserialize {
+    use chrono::{DateTime, Utc, TimeZone};
+    use serde::{self, Deserialize, Deserializer, Serializer};
+
+    pub fn serialize<S>(date: &DateTime<Utc>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(&date.to_rfc3339())
+    }
+
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<DateTime<Utc>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        use serde::de::Error;
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        enum Timestamp {
+            Unix(i64),
+            Rfc3339(String),
+        }
+
+        match Timestamp::deserialize(deserializer)? {
+            Timestamp::Unix(ts) => {
+                Utc.timestamp_opt(ts, 0)
+                    .single()
+                    .ok_or_else(|| Error::custom("invalid timestamp"))
+            }
+            Timestamp::Rfc3339(s) => {
+                s.parse::<DateTime<Utc>>()
+                    .map_err(|e| Error::custom(format!("invalid RFC 3339 timestamp: {}", e)))
+            }
+        }
+    }
 }
 
 /// 訊息負載
@@ -90,7 +131,6 @@ pub enum MessagePayload {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AuthChallengePayload {
     pub challenge: String,
-    pub timestamp: u64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -158,7 +198,6 @@ pub struct TaskProgressPayload {
     pub progress: f32,
     pub stage: String,
     pub metrics: TaskMetrics,
-    pub timestamp: DateTime<Utc>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -199,7 +238,6 @@ pub struct HeartbeatPayload {
     pub current_task_id: Option<String>,
     pub gpu_status: Vec<GPUStatus>,
     pub uptime_sec: u64,
-    pub timestamp: DateTime<Utc>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -406,7 +444,6 @@ pub fn create_heartbeat(
             current_task_id,
             gpu_status,
             uptime_sec,
-            timestamp: Utc::now(),
         }),
     )
 }

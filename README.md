@@ -159,11 +159,12 @@ reserved_vram_gb = 2
 
 ### Pricing Model
 
+```
 Base Rate × GPU Multiplier × Runtime = Earnings
+```
 
-**Base Rate**: $0.01 USD / GPU Hour
-
-**GPU Multipliers**:
+- **Base Rate**: $0.01 USD / GPU Hour
+- **GPU Multiplier**: Based on GPU model
 
 | GPU Model | Multiplier | Hourly Rate |
 |-----------|------------|-------------|
@@ -173,12 +174,12 @@ Base Rate × GPU Multiplier × Runtime = Earnings
 | RTX 3080  | 1.5×       | $0.015     |
 | V100      | 3.5×       | $0.035     |
 
-### Earnings Example
+### Bonus Programs
 
-**RTX 4090** running 24/7:
-- Daily: $0.025 × 24 = **$0.60**
-- Monthly: $0.60 × 30 = **$18.00**
-- Yearly: $18.00 × 12 = **$216.00**
+- **New Node Bonus** - Extra rewards for newly joined nodes
+- **Reliability Bonus** - Multiplier for high-uptime nodes
+- **Priority Task Bonus** - Additional rewards for urgent tasks
+- **Referral Bonus** - Revenue sharing for node referrals
 
 ## 📝 Development
 

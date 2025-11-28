@@ -8,8 +8,10 @@ use crate::error::{Error, Result};
 use crate::AgentConfig;
 
 use tokio::net::TcpStream;
-use tokio_tungstenite::{connect_async, MaybeTlsStream, WebSocketStream};
+use tokio_tungstenite::{connect_async, MaybeTlsStream, WebSocketStream, tungstenite};
 use tokio_tungstenite::tungstenite::protocol::Message as WsMessage;
+use tokio_tungstenite::tungstenite::http;
+use tungstenite::client::IntoClientRequest;
 use futures::{StreamExt, SinkExt};
 use tracing::{info, warn, error};
 use std::sync::Arc;
@@ -48,7 +50,17 @@ impl OrbanClient {
 
         let url = format!("{}/agent/v1/connect", self.config.platform_url);
 
-        let (ws_stream, _) = connect_async(&url)
+        // 使用 IntoClientRequest trait 添加子協議
+        let mut request = url.into_client_request()
+            .map_err(|e| Error::ConnectionFailed(format!("Invalid URL: {}", e)))?;
+
+        // 添加子協議頭
+        request.headers_mut().insert(
+            "Sec-WebSocket-Protocol",
+            "agent.orban.v1".parse().unwrap()
+        );
+
+        let (ws_stream, _) = connect_async(request)
             .await
             .map_err(|e| Error::ConnectionFailed(e.to_string()))?;
 
@@ -150,7 +162,13 @@ impl OrbanClient {
 
     /// 接收訊息
     pub async fn receive(&self) -> Option<Message> {
-        self.receive_message().await.ok()
+        match self.receive_message().await {
+            Ok(msg) => Some(msg),
+            Err(e) => {
+                error!("Failed to receive message: {}", e);
+                None
+            }
+        }
     }
 
     /// 接收訊息 (內部)
@@ -159,6 +177,7 @@ impl OrbanClient {
             while let Some(msg) = ws.next().await {
                 match msg {
                     Ok(WsMessage::Text(text)) => {
+                        tracing::debug!("Received message: {}", text);
                         return Message::from_json(&text);
                     }
                     Ok(WsMessage::Binary(data)) => {
@@ -228,6 +247,32 @@ impl OrbanClient {
         // TODO: 實現完整的任務完成訊息
         info!("Task {} completed", task_id);
         Ok(())
+    }
+
+    /// 發送 PoW 響應
+    pub async fn send_pow_response(&self, response: crate::gpu::PowResponse) -> Result<()> {
+        use super::orban_protocol::{Message, MessageType, MessagePayload, PowResponsePayload, GpuSignature};
+
+        info!("Sending PoW response for challenge: {}", response.challenge_id);
+
+        let payload = PowResponsePayload {
+            challenge_id: response.challenge_id,
+            response: hex::encode(response.response),  // Convert Vec<u8> to hex string
+            computation_time_ms: response.computation_time_ms as u32,
+            gpu_signature: GpuSignature {
+                device_uuid: response.gpu_signature.device_uuid,
+                cuda_version: response.gpu_signature.cuda_version,
+            },
+        };
+
+        let msg = Message {
+            message_id: uuid::Uuid::new_v4().to_string(),
+            timestamp: chrono::Utc::now(),
+            message_type: MessageType::PowResponse,
+            payload: MessagePayload::PowResponse(payload),
+        };
+
+        self.send_message(&msg).await
     }
 
     /// 斷線
